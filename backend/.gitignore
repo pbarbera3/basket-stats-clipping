@@ -1,0 +1,41 @@
+# === Python build / cache ===
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+
+# === Virtual environments ===
+.venv/
+venv/
+env/
+
+# === Environment files ===
+.env
+.env.local
+.env.*.local
+
+# === Data and artifacts ===
+data/
+datasets/
+outputs/
+results/
+tmp/
+cache/
+*.db
+*.sqlite3
+
+# === IDE / editors ===
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# === OS junk ===
+.DS_Store
+Thumbs.db
+
+# === Other project-specific ===
+# (aggiungi qui se usi per esempio model checkpoints o upload temporanei)
+models/
+uploads/

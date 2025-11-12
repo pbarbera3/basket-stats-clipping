@@ -1,0 +1,131 @@
+.playerpage-container {
+  min-height: 100vh;
+  background-color: #111;
+  color: #fff;
+  font-family: Arial, Helvetica, sans-serif;
+  padding: 32px 24px 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.back-link {
+  align-self: flex-start;
+  color: #aaa;
+  text-decoration: none;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: normal;
+  gap: 6px;
+  transition: color 0.2s ease;
+}
+.back-link:hover { color: #fff; }
+
+.playerpage-title {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.games-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.5rem;
+  width: 100%;
+  max-width: 1000px;
+}
+
+/* card */
+.game-card {
+  background-color: #1c1c1c;
+  border-radius: 12px;
+  padding: 1.2rem 1.4rem;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+  transition: background-color .3s ease, transform .15s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+}
+.game-card:hover { background-color: #262626; transform: translateY(-1px); }
+
+/* logos + score outside */
+.logos-row {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 0.8rem;
+}
+.team-block {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.team-logo {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+  background-color: #222;
+  border-radius: 10px;
+  padding: 6px;
+}
+.score-num {
+  font-weight: 800;
+  font-size: 22px;
+  color: #fff;
+  min-width: 28px;
+  text-align: center;
+}
+.vs-text { font-size: 22px; color: #bdbdbd; }
+
+.game-info { text-align: center; }
+.game-name { font-size: 1.1rem; font-weight: bold; margin: 0; }
+.game-subtext { margin-top: 0.2rem; font-size: 0.9rem; color: #aaa; }
+
+/* compact 5-stat line */
+.compact-stats {
+  margin-top: 0.6rem;
+  font-size: 0.92rem;
+  color: #e7e7e7;
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.compact-stats .pipe {
+  color: #6f6f6f;
+}
+
+/* mini selector */
+.mini-selector {
+  margin-top: 0.5rem;
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+.mini-pill {
+  background: #161616;
+  color: #ddd;
+  border: 1px solid #2a2a2a;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all .2s ease;
+}
+.mini-pill:hover { background:#232323; color:#fff; }
+.mini-pill.active {
+  background:#242424;
+  border-color:#555;
+  color:#fff;
+  box-shadow: 0 0 0 1px rgba(255,255,255,.1) inset;
+}
+
+/* responsive tweaks */
+@media (max-width: 480px) {
+  .team-logo { width: 48px; height: 48px; }
+  .score-num { font-size: 18px; }
+  .compact-stats { font-size: 0.86rem; gap: 6px; }
+}

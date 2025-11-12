@@ -1,0 +1,26 @@
+[
+  {
+    "name": "Andrew Osasuyi",
+    "slug": "Andrew_Osasuyi",
+    "team": "St. Bonaventure University",
+    "teamColor": "#4e3227",
+    "games": [
+      {
+        "name": "Canisius @ St. Bonaventure",
+        "slug": "Canisius@StBonaventure"
+      }
+    ]
+  },
+  {
+    "name": "Gabriel Pozzato",
+    "slug": "Gabriel_Pozzato",
+    "team": "Xavier University",
+    "teamColor": "#21304e",
+    "games": [
+      {
+        "name": "Evansville @ Belmont",
+        "slug": "Evansville@Belmont"
+      }
+    ]
+  }
+]
