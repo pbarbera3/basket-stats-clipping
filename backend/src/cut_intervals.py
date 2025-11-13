@@ -65,7 +65,7 @@ def main(output_dir):
         if start_time > end_time:
             start_time, end_time = end_time, start_time
 
-        clip_name = f"interval_{i + 1}.mp4"
+        clip_name = f"stint_{i + 1}.mp4"
         clip_path = os.path.join(output_dir, clip_name)
 
         cmd = [

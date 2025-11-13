@@ -21,10 +21,7 @@ PLAYER_PHOTO_URL = (
     if PLAYER_ID else None
 )
 
-# Allow both jpg and png locally
-LOCAL_PHOTO_JPG = Path(f"data/photos/{PLAYER_NAME.replace(' ', '_')}.jpg")
-LOCAL_PHOTO_PNG = Path(f"data/photos/{PLAYER_NAME.replace(' ', '_')}.png")
-
+LOCAL_PHOTO = Path(f"data/photos/{PLAYER_NAME.replace(' ', '_')}.jpg")
 LOCAL_PBP_JSON = Path("data/metadata/pbp.json")
 # ==================
 
@@ -46,62 +43,13 @@ s3 = boto3.client(
 )
 
 
-def b2_url(key: str) -> str:
+def b2_url(key):
     return f"{B2_DOWNLOAD_BASE}/{B2_BUCKET}/{quote(key)}"
 
 
 def upload(local: Path, key: str) -> str:
     s3.upload_file(str(local), B2_BUCKET, key)
     return b2_url(key)
-
-
-def object_exists(bucket: str, key: str) -> bool:
-    try:
-        s3.head_object(Bucket=bucket, Key=key)
-        return True
-    except s3.exceptions.ClientError as e:
-        code = e.response.get("Error", {}).get("Code", "")
-        if code in ("404", "NoSuchKey", "NotFound"):
-            return False
-        raise
-
-
-def find_existing_remote_photo(player_key: str) -> tuple[str, str] | tuple[None, None]:
-    """
-    Check B2 for an existing photo; returns (key, url) or (None, None).
-    Prefer jpg, then png (or flip this if you prefer png first).
-    """
-    for ext in ("jpg", "png"):
-        key = f"{player_key}/photo.{ext}"
-        if object_exists(B2_BUCKET, key):
-            return key, b2_url(key)
-    return None, None
-
-
-def pick_local_photo() -> tuple[Path | None, str | None]:
-    """
-    Return (path, ext) for a local photo if present, preferring JPG then PNG.
-    """
-    if LOCAL_PHOTO_JPG.exists():
-        return LOCAL_PHOTO_JPG, "jpg"
-    if LOCAL_PHOTO_PNG.exists():
-        return LOCAL_PHOTO_PNG, "png"
-    return None, None
-
-
-def download_photo_from_espn(dst: Path) -> bool:
-    try:
-        r = requests.get(PLAYER_PHOTO_URL, timeout=10)
-        if r.ok:
-            dst.parent.mkdir(parents=True, exist_ok=True)
-            dst.write_bytes(r.content)
-            print(f"✅ Downloaded player photo from ESPN: {PLAYER_PHOTO_URL}")
-            return True
-        print(f"⚠️ Failed to fetch player photo (status {r.status_code})")
-        return False
-    except Exception as e:
-        print(f"⚠️ Error downloading photo: {e}")
-        return False
 
 
 def parse_game_name(game_name: str):
@@ -125,30 +73,38 @@ def main():
         "metadata": {}
     }
 
-    # --- PLAYER PHOTO (upload only if NOT already in B2) ---
-    remote_key, remote_url = find_existing_remote_photo(player_key)
-    if remote_url:
-        summary["photo"] = remote_url
-        print(f"✅ Player photo already in B2: {remote_url}")
+    # --- PLAYER PHOTO ---
+    if PLAYER_ID and not LOCAL_PHOTO.exists():
+        try:
+            r = requests.get(PLAYER_PHOTO_URL, timeout=10)
+            if r.ok:
+                LOCAL_PHOTO.parent.mkdir(parents=True, exist_ok=True)
+                LOCAL_PHOTO.write_bytes(r.content)
+                print(
+                    f"✅ Downloaded player photo from ESPN: {PLAYER_PHOTO_URL}")
+            else:
+                print(
+                    f"⚠️ Failed to fetch player photo (status {r.status_code})")
+        except Exception as e:
+            print(f"⚠️ Error downloading photo: {e}")
+
+    if LOCAL_PHOTO.exists():
+        key = f"{player_key}/photo/{LOCAL_PHOTO.name}"
+
+        # ✅ Check if photo already exists on cloud
+        try:
+            s3.head_object(Bucket=B2_BUCKET, Key=key)
+            print(f"ℹ️ Player photo already exists on cloud: {b2_url(key)}")
+            summary["photo"] = b2_url(key)
+        except s3.exceptions.ClientError as e:
+            if e.response["Error"]["Code"] == "404":
+                # File not found → upload
+                summary["photo"] = upload(LOCAL_PHOTO, key)
+                print(f"✅ Uploaded player photo: {summary['photo']}")
+            else:
+                raise
     else:
-        # Try local first
-        local_photo, ext = pick_local_photo()
-
-        # If no local photo, try ESPN (if we have PLAYER_ID)
-        if not local_photo and PLAYER_ID and PLAYER_PHOTO_URL:
-            local_photo = LOCAL_PHOTO_PNG  # save ESPN headshot as PNG
-            ext = "png"
-            ok = download_photo_from_espn(local_photo)
-            if not ok:
-                local_photo, ext = None, None
-
-        if local_photo:
-            key = f"{player_key}/photo.{ext}"
-            url = upload(local_photo, key)
-            summary["photo"] = url
-            print(f"✅ Uploaded player photo: {url}")
-        else:
-            print("ℹ️ Skipping player photo upload (no local photo and/or no PLAYER_ID).")
+        print("ℹ️ Skipping player photo upload (PLAYER_ID=None or local missing).")
 
     # --- Load ESPN JSON ---
     if not LOCAL_PBP_JSON.exists():
@@ -177,15 +133,17 @@ def main():
             if logos and isinstance(logos, list) and "href" in (logos[0] or {}):
                 logo_url = logos[0]["href"]
 
-        # Canonical logo filename by side to avoid duplicates
-        logo_filename = f"{side}.png"
+        logo_filename = (
+            f"{home_name.lower().replace(' ', '-')}.png" if side == "home"
+            else f"{away_name.lower().replace(' ', '-')}.png"
+        )
 
-        # Download + upload (always safe to overwrite logos)
+        # Download + upload
         if logo_url:
             try:
                 lr = requests.get(logo_url, timeout=10)
                 if lr.ok:
-                    local_logo = Path(f".tmp_logo_{side}.png")
+                    local_logo = Path(f"temp_{logo_filename}")
                     local_logo.write_bytes(lr.content)
                     key = f"{base_prefix}/logos/{logo_filename}"
                     logo_b2 = upload(local_logo, key)
@@ -214,26 +172,23 @@ def main():
     summary["metadata"]["boxscore"] = boxscore
 
     player_totals = {}
-    if PLAYER_ID:
-        for team in boxscore:
-            for stat_group in team.get("statistics", []) or []:
-                names = stat_group.get("names", []) or []
-                for athlete in stat_group.get("athletes", []) or []:
-                    a = athlete.get("athlete", {}) or {}
-                    if a.get("id") == PLAYER_ID:
-                        stats_values = athlete.get("stats", []) or []
-                        player_totals = dict(zip(names, stats_values))
-                        summary["totals"] = player_totals
-                        print("✅ Extracted player totals from ESPN boxscore")
-                        break
-                if player_totals:
+    for team in boxscore:
+        for stat_group in team.get("statistics", []) or []:
+            names = stat_group.get("names", []) or []
+            for athlete in stat_group.get("athletes", []) or []:
+                a = athlete.get("athlete", {}) or {}
+                if PLAYER_ID and a.get("id") == PLAYER_ID:
+                    stats_values = athlete.get("stats", []) or []
+                    player_totals = dict(zip(names, stats_values))
+                    summary["totals"] = player_totals
+                    print("✅ Extracted player totals from ESPN boxscore")
                     break
             if player_totals:
                 break
-    else:
-        print("ℹ️ PLAYER_ID not provided; skipping totals extraction.")
+        if player_totals:
+            break
 
-    if not player_totals and PLAYER_ID:
+    if not player_totals:
         print("⚠️ Could not find player totals (check ID or JSON structure).")
 
     # --- Upload summary manifest ---

@@ -12,6 +12,34 @@ CLOCK_ROI = None
 # ======================
 
 
+def normalize_clock(raw: str):
+    if not raw:
+        return None
+
+    s = raw.strip().replace(" ", "").replace(
+        "•", "").replace("-", "").replace(";", ":")
+    s = s.replace(",", ":").replace(
+        ".", ":").replace("O", "0").replace("o", "0")
+
+    # Case 1: already M:SS
+    if re.match(r"^\d{1,2}:\d{2}$", s):
+        return s
+
+    # Case 2: format like "1900" → "19:00"
+    if re.match(r"^\d{3,4}$", s):
+        return s[:-2] + ":" + s[-2:]
+
+    # Case 3: shot clock decimals (e.g. "45.3")
+    if re.match(r"^\d{1,2}\.\d$", raw.strip()):
+        return raw.strip()
+
+    # Case 4: a lonely number like "19" → assume "19:00"
+    if re.match(r"^\d{1,2}$", s):
+        return s + ":00"
+
+    return None
+
+
 def extract_clock_ocr(video_path: str,
                       output_csv: str = "data/metadata/clock_map.csv",
                       sample_rate: int = 1):
@@ -69,12 +97,8 @@ def extract_clock_ocr(video_path: str,
         text = reader.readtext(gray, detail=0)
         clock_text = None
         for t in text:
-            t_clean = t.strip()
-            if re.match(r"^\d{1,2}\.\d$", t_clean):
-                clock_text = t_clean
-                break
-            if re.match(r"^\d{1,2}:\d{2}$", t_clean):
-                clock_text = t_clean
+            clock_text = normalize_clock(t)
+            if clock_text:
                 break
 
         if clock_text:

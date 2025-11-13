@@ -60,16 +60,12 @@ def upload(local: Path, key: str) -> str:
 
 # ---------- STINTS ----------
 def enumerate_stints(stints_dir: Path):
-    """Return all mp4 files sorted as stints (interval_1.mp4 → stint_1.mp4)."""
-    files = sorted(stints_dir.glob("interval_*.mp4"))
-    stints = []
-    for idx, f in enumerate(files, start=1):
-        new_name = f"stint_{idx}.mp4"
-        new_path = f.parent / new_name
-        if new_path != f:
-            f.rename(new_path)
-        stints.append(new_path)
-    return stints
+    """Return all mp4 stints sorted numerically."""
+    files = list(stints_dir.glob("stint_*.mp4"))
+
+    files.sort(key=lambda f: int(f.stem.split("_")[1]))  # extract number
+
+    return files
 
 
 # ---------- STATS ----------
