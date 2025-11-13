@@ -23,9 +23,8 @@ interface Stint {
 export default function GamePage() {
   const { playerSlug, gameSlug } = useParams();
   const decodedGame = decodeURIComponent(gameSlug || "");
-  const base = `https://f005.backblazeb2.com/file/game-films/${playerSlug}/${encodeURIComponent(
-    decodedGame
-  )}`;
+  const base = `https://game-films.s3.us-east-005.backblazeb2.com/${playerSlug}/${encodeURIComponent(decodedGame)}`;
+
 
   const [summary, setSummary] = useState<Summary | null>(null);
   const [manifest, setManifest] = useState<Manifest | null>(null);
