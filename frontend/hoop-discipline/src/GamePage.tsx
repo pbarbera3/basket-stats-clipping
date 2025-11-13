@@ -49,27 +49,57 @@ export default function GamePage() {
     "missed_shots"
     ];
 
-  // Format compact stat line: 5 stats (PTS | REB | top2(AST,BLK,STL) | FG)
+  // helper per FG e FG%
+  function computeFgInfo(t: Record<string, string>) {
+    const rawFg = t["FG"] || "";
+    let fgDisplay = rawFg || "—";
+
+    // Se abbiamo già FG%
+    if (t["FG%"] && t["FG%"].trim() !== "") {
+      return { fgDisplay, fgPctDisplay: t["FG%"] };
+    }
+
+    // Proviamo a calcolare da "FG" tipo "5-12"
+    if (rawFg.includes("-")) {
+      const [madeStr, attStr] = rawFg.split("-");
+      const made = parseFloat(madeStr);
+      const att = parseFloat(attStr);
+      if (!isNaN(made) && !isNaN(att) && att > 0) {
+        const pct = ((made / att) * 100).toFixed(1); // es: 41.7
+        return { fgDisplay, fgPctDisplay: pct };
+      }
+    }
+
+    // fallback, nessuna info utile
+    return { fgDisplay, fgPctDisplay: "" };
+  }
+
+
   function compactStats(t: Record<string, string>): string {
-    const pts = t["PTS"];
-    const reb = t["REB"];
+    const pts = t["PTS"] ?? "—";
+    const reb = t["REB"] ?? "—";
     const ast = parseFloat(t["AST"] || "0");
     const blk = parseFloat(t["BLK"] || "0");
     const stl = parseFloat(t["STL"] || "0");
-    const fg = t["FG"];
-    const fgp = t["FG%"];
+
+    const { fgDisplay, fgPctDisplay } = computeFgInfo(t);
 
     // pick 2 best among AST, BLK, STL
     const topTwo = Object.entries({ AST: ast, BLK: blk, STL: stl })
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 2)
-        .map(([key]) => `${key}: ${t[key]}`); // <-- keep uppercase here
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 2)
+      .map(([key]) => `${key}: ${t[key] ?? "0"}`); // <-- keep uppercase here
+
+    const fgPart =
+      fgPctDisplay && fgPctDisplay !== "—"
+        ? `FG: ${fgDisplay} (${fgPctDisplay}%)`
+        : `FG: ${fgDisplay}`;
 
     const parts = [
-        `PTS: ${pts}`,
-        `REB: ${reb}`,
-        ...topTwo,
-        `FG: ${fg} (${fgp}%)`,
+      `PTS: ${pts}`,
+      `REB: ${reb}`,
+      ...topTwo,
+      fgPart,
     ].filter(Boolean);
 
     return parts.join(" | ");

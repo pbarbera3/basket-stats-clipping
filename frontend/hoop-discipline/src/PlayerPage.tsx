@@ -69,6 +69,31 @@ export default function PlayerPage() {
     run();
   }, [slug]);
 
+  // helper per FG e FG%
+  function computeFgInfo(t: Record<string, string>) {
+    const rawFg = t["FG"] || "";
+    let fgDisplay = rawFg || "—";
+
+    // Se abbiamo già FG%
+    if (t["FG%"] && t["FG%"].trim() !== "") {
+      return { fgDisplay, fgPctDisplay: t["FG%"] };
+    }
+
+    // Proviamo a calcolare da "FG" tipo "5-12"
+    if (rawFg.includes("-")) {
+      const [madeStr, attStr] = rawFg.split("-");
+      const made = parseFloat(madeStr);
+      const att = parseFloat(attStr);
+      if (!isNaN(made) && !isNaN(att) && att > 0) {
+        const pct = ((made / att) * 100).toFixed(1); // es: 41.7
+        return { fgDisplay, fgPctDisplay: pct };
+      }
+    }
+
+    // fallback, nessuna info utile
+    return { fgDisplay, fgPctDisplay: "" };
+  }
+
   if (!player) return <div className="loading">Loading player...</div>;
 
   function getTopStats(t: Totals) {
@@ -111,15 +136,20 @@ export default function PlayerPage() {
 
     const t = data.totals || {};
     const topTwo = getTopStats(t);
-    const fg = t["FG"] ?? "—";
-    const fgp = t["FG%"] ?? "—";
+    
+    const { fgDisplay, fgPctDisplay } = computeFgInfo(t);
+
+    const fgPart =
+      fgPctDisplay && fgPctDisplay !== "—"
+        ? `FG: ${fgDisplay} (${fgPctDisplay}%)`
+        : `FG: ${fgDisplay}`;
 
     const statLine = [
       `PTS: ${t["PTS"] ?? "—"}`,
       `REB: ${t["REB"] ?? "—"}`,
       `${topTwo[0]}: ${t[topTwo[0]] ?? "—"}`,
       `${topTwo[1]}: ${t[topTwo[1]] ?? "—"}`,
-      `FG: ${fg} (${fgp}%)`,
+      fgPart,
     ].join(" | ");
 
     return (

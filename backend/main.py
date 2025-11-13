@@ -78,7 +78,7 @@ def main():
             print("⏭️  Skipping fetch_data.py (play by play cache found)")
             continue
         if script_name == "parse_subs.py" and subs.exists():
-            print("⏭️  Skipping fetch_data.py (play by play cache found)")
+            print("⏭️  Skipping parse_subs.py (subs intervals cache found)")
             continue
         if script_name == "extract_clock_ocr.py" and raw_ocr_csv.exists():
             print("⏭️  Skipping extract_clock_ocr.py (raw OCR cache found)")

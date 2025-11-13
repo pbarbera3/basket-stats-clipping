@@ -30,5 +30,17 @@
         "slug": "Evansville@MissouriState"
       }
     ]
+  },
+  {
+    "name": "Timoty Van Der Knaap",
+    "slug": "Timoty_Van_Der_Knaap",
+    "team": "Bradley University",
+    "teamColor": "#a40000",
+    "games": [
+      {
+        "name": "UT Martin @ Bradley",
+        "slug": "UTMartin@Bradley"
+      }
+    ]
   }
 ]
