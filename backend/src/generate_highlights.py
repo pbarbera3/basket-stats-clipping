@@ -76,12 +76,15 @@ def categorize_play(play, player_name):
     cats = []
     p = player_name.lower()
 
+    # Skip free throws
     if "free throw" in text:
         return []
 
+    # Assists
     if f"assisted by {p}" in text:
         cats.append("assists")
 
+    # Made/Missed shots
     if f"{p} made" in text or f"{p} missed" in text:
         made = "made" in text
         if "three point" in text:
@@ -91,17 +94,25 @@ def categorize_play(play, player_name):
 
         cats += ["made_shots" if made else "missed_shots", "all_shots"]
 
+    # Rebounds
     if "defensive rebound" in text:
         cats += ["def_rebound", "rebounds"]
     elif "offensive rebound" in text:
         cats += ["off_rebound", "rebounds"]
 
+    # Blocks
     if "block" in text:
         cats.append("blocks")
 
+    # Steals
+    if f"{p} steal" in text:
+        cats.append("steals")
+
+    # Turnovers
     if "turnover" in text or "lost the ball" in text:
         cats.append("turnovers")
 
+    # Fouls
     if f"foul on {p}" in text or f"{p} foul" in text:
         cats.append("fouls")
 
@@ -134,15 +145,6 @@ def main(output_dir):
         video_time, delta = find_video_time_by_period(clock_df, clock, period)
         if video_time is None:
             continue
-
-        # deep debug
-        if is_deep_debug(text):
-            print("\n============ DEEP DEBUG MATCH ============")
-            print(f"TEXT:       {text}")
-            print(f"CATEGORIES: {cats}")
-            print(f"CLOCK:      {clock}  PERIOD: {period}")
-            print(f"OCR time:   {video_time:.2f}  | delta: {delta:+.2f}")
-            print("==========================================\n")
 
         for c in cats:
             events.append({
@@ -183,17 +185,6 @@ def main(output_dir):
                 seg_name = f"{category}_{i:04d}.mp4"
                 seg_path = os.path.join(temp_cat_dir, seg_name)
                 segment_paths.append(seg_path)
-
-                # deep debug only for the two plays you care about
-                if is_deep_debug(row.text):
-                    print("\n************* DEEP DEBUG CLIP *************")
-                    print(f"PLAY:        {row.text}")
-                    print(f"OCR TIME:    {row.video_time:.2f}")
-                    print(f"DELTA:       {row.delta:+.2f}")
-                    print(f"REAL TIME:   {real_video_time:.2f}")
-                    print(f"WINDOW:      {start:.2f} → {end:.2f}")
-                    print(f"FILE:        {seg_name}")
-                    print("*******************************************\n")
 
                 cmd = [
                     FFMPEG_PATH, "-y",

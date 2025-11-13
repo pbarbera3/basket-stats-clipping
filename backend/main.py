@@ -69,11 +69,15 @@ def main():
     raw_ocr_csv = Path("data/metadata/clock_map.csv")
     clean_ocr_csv = Path("data/metadata/clock_map_clean.csv")
     pbp_file = Path("data/metadata/pbp.json")
+    subs = Path("data/metadata/subs_intervals.csv")
 
     for script, args in scripts:
         script_name = os.path.basename(script)
 
         if script_name == "fetch_data.py" and pbp_file.exists():
+            print("⏭️  Skipping fetch_data.py (play by play cache found)")
+            continue
+        if script_name == "parse_subs.py" and subs.exists():
             print("⏭️  Skipping fetch_data.py (play by play cache found)")
             continue
         if script_name == "extract_clock_ocr.py" and raw_ocr_csv.exists():

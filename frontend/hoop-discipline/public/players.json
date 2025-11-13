@@ -20,6 +20,10 @@
       {
         "name": "Evansville @ Belmont",
         "slug": "Evansville@Belmont"
+      },
+            {
+        "name": "Evansville @ MissouriState",
+        "slug": "Evansville@MissouriState"
       }
     ]
   }
