@@ -38,6 +38,10 @@
     "teamColor": "#a40000",
     "games": [
       {
+        "name": "Central Michigan @ Bradley",
+        "slug": "CentralMichigan@Bradley"
+      },
+      {
         "name": "UT Martin @ Bradley",
         "slug": "UTMartin@Bradley"
       }
