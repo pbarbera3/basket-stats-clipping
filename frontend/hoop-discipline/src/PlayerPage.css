@@ -123,6 +123,67 @@
   box-shadow: 0 0 0 1px rgba(255,255,255,.1) inset;
 }
 
+/* === SKELETON LOADER === */
+
+.skeleton {
+  background: #1a1a1a;
+  border-radius: 12px;
+  overflow: hidden;
+  padding: 16px;
+  animation: pulse 1.3s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0% { background-color: #1a1a1a; }
+  50% { background-color: #2a2a2a; }
+  100% { background-color: #1a1a1a; }
+}
+
+.skeleton-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.skeleton-logo {
+  width: 45px;
+  height: 45px;
+  background: #333;
+  border-radius: 8px;
+}
+
+.skeleton-score {
+  width: 28px;
+  height: 22px;
+  background: #333;
+  border-radius: 6px;
+}
+
+.skeleton-title {
+  width: 60%;
+  height: 18px;
+  background: #333;
+  border-radius: 6px;
+  margin: 10px 0;
+}
+
+.skeleton-subtext {
+  width: 40%;
+  height: 14px;
+  background: #333;
+  border-radius: 6px;
+}
+
+.skeleton-stats {
+  width: 90%;
+  height: 14px;
+  background: #333;
+  border-radius: 6px;
+  margin-top: 8px;
+}
+
+
 /* responsive tweaks */
 @media (max-width: 480px) {
   .team-logo { width: 48px; height: 48px; }

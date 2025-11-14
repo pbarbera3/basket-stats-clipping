@@ -231,7 +231,7 @@ export default function GamePage() {
           src={stintUrl}
           controls
           playsInline
-          preload="auto"
+          preload="metadata"
           onWaiting={(e) => console.log("⏳ Buffering stint video")}
           onCanPlay={(e) => console.log("✅ Stint video ready")}
         />
@@ -258,7 +258,7 @@ export default function GamePage() {
             src={statUrl}
             controls
             playsInline
-            preload="auto"
+            preload="metadata"
             onWaiting={(e) => console.log("⏳ Buffering stat video")}
             onCanPlay={(e) => console.log("✅ Stat video ready")}
           />  

@@ -69,6 +69,43 @@ export default function PlayerPage() {
     run();
   }, [slug]);
 
+  // ⬇️ PRELOAD thumbnails per tutte le partite (stints + stats)
+  useEffect(() => {
+    if (!player || cards.length === 0) return;
+
+    const STAT_KEYS = [
+      "made_shots",
+      "assists",
+      "rebounds",
+      "steals",
+      "blocks",
+      "turnovers",
+      "fouls",
+      "2pt_made",
+      "3pt_made",
+      "missed_shots",
+    ];
+
+    cards.forEach((c) => {
+      const base = `https://f005.backblazeb2.com/file/game-films/${player.slug}/${encodeURIComponent(
+        c.game.slug
+      )}`;
+
+      // --- preload STINT thumbnails ---
+      for (let i = 1; i <= 6; i++) {   // massimo 6 stints, ignorati se non esistono
+        const img = new Image();
+        img.src = `${base}/stints/stint_${i}.jpg`;
+      }
+
+      // --- preload STAT thumbnails ---
+      STAT_KEYS.forEach((key) => {
+        const img = new Image();
+        img.src = `${base}/stats/${key}.jpg`;
+      });
+    });
+  }, [player, cards]);
+
+
   // helper per FG e FG%
   function computeFgInfo(t: Record<string, string>) {
     const rawFg = t["FG"] || "";
@@ -180,6 +217,24 @@ export default function PlayerPage() {
     );
   }
 
+  function SkeletonCard() {
+    return (
+      <div className="game-card skeleton">
+        <div className="skeleton-row">
+          <div className="skeleton-logo"></div>
+          <div className="skeleton-score"></div>
+          <div className="skeleton-score"></div>
+          <div className="skeleton-logo"></div>
+        </div>
+
+        <div className="skeleton-title"></div>
+        <div className="skeleton-subtext"></div>
+        <div className="skeleton-stats"></div>
+      </div>
+    );
+  }
+
+
   return (
     <div className="playerpage-container">
       <Link to="/" className="back-link">
@@ -189,10 +244,14 @@ export default function PlayerPage() {
       <h1 className="playerpage-title">{player.name}</h1>
 
       <div className="games-grid">
-        {cards.map((c) => (
-          <GameCard key={c.game.slug} data={c} playerSlug={player.slug} />
-        ))}
+
+        {cards.length === 0
+          ? Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)
+          : cards.map((c) => <GameCard key={c.game.slug} data={c} playerSlug={player.slug} />)
+        }
+
       </div>
     </div>
   );
+
 }
