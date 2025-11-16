@@ -9,10 +9,12 @@
         "name": "Canisius @ St. Bonaventure",
         "slug": "Canisius@StBonaventure"
       },
-            {
+      {
         "name": "Siena @ St. Bonaventure",
         "slug": "Siena@StBonaventure"
       }
+      
+      
     ]
   },
   {
@@ -44,6 +46,10 @@
       {
         "name": "UT Martin @ Bradley",
         "slug": "UTMartin@Bradley"
+      },
+      {
+        "name": "Bradley @ San Francisco",
+        "slug": "Bradley@SanFrancisco"
       }
     ]
   }
