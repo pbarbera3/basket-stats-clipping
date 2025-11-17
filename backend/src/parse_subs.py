@@ -34,7 +34,7 @@ def was_in_at_end(events, half):
     if not events_half:
         return False
 
-    state = False  # False = OUT, True = IN
+    state = False
 
     for ev in events_half:
         if ev["action"] == "IN":
@@ -52,9 +52,6 @@ def parse_player_subs(json_path, player_name):
     events = data.get("plays", []) or data.get("pbp", [])
     player_events = []
 
-    # -----------------------------
-    # Extract IN/OUT events
-    # -----------------------------
     for ev in events:
         txt = ev.get("text", "")
         clock_raw = ev.get("clock", "")
@@ -81,7 +78,6 @@ def parse_player_subs(json_path, player_name):
                 "clock": clock
             })
 
-        # Generic "enters for" format
         elif re.search(r"enters the game for", txt_lower):
             match = re.search(
                 r"(.+?) enters the game for (.+)", txt, re.IGNORECASE)
@@ -100,12 +96,8 @@ def parse_player_subs(json_path, player_name):
                         "clock": clock
                     })
 
-    # Sort by half + descending clock
     player_events.sort(key=lambda e: (e["half"], -clock_to_sec(e["clock"])))
 
-    # -----------------------------
-    # Build base intervals
-    # -----------------------------
     intervals = []
     current_half = None
     start_clock = None
@@ -130,9 +122,6 @@ def parse_player_subs(json_path, player_name):
             })
             start_clock = None
 
-    # -----------------------------
-    # Handle intervals that should end at 0:00
-    # -----------------------------
     for ev in player_events:
         if ev["action"] == "IN":
             exists = any(
@@ -146,15 +135,11 @@ def parse_player_subs(json_path, player_name):
                     "end_clock": "0:00"
                 })
 
-    # -----------------------------
-    # 🔥 CROSS-PERIOD FIX
-    # -----------------------------
     was_in_first = was_in_at_end(player_events, "1st Half")
 
     events_2nd = [e for e in player_events if e["half"] == "2nd Half"]
 
     if was_in_first:
-        # Player ended 1st half ON FLOOR → starts 2nd half at 20:00
         first_event = events_2nd[0] if events_2nd else None
 
         if first_event and first_event["action"] == "OUT":
@@ -172,11 +157,6 @@ def parse_player_subs(json_path, player_name):
                 "end_clock": next_out["clock"] if next_out else "0:00"
             })
 
-    # If not in at the end of 1st half → do NOTHING (correct)
-
-    # -----------------------------
-    # Sort clean output
-    # -----------------------------
     intervals.sort(key=lambda i: (i["half"], -clock_to_sec(i["start_clock"])))
     return intervals
 
@@ -191,7 +171,7 @@ def save_subs(intervals, out_path, player_name):
                 [player_name, e["half"], e["start_clock"], e["end_clock"]])
 
     print(
-        f"✅ Saved {len(intervals)} intervals for {player_name} to {out_path}")
+        f"Saved {len(intervals)} intervals for {player_name} to {out_path}")
 
 
 if __name__ == "__main__":

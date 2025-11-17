@@ -69,7 +69,6 @@ export default function PlayerPage() {
     run();
   }, [slug]);
 
-  // ⬇️ PRELOAD thumbnails per tutte le partite (stints + stats)
   useEffect(() => {
     if (!player || cards.length === 0) return;
 
@@ -91,13 +90,11 @@ export default function PlayerPage() {
         c.game.slug
       )}`;
 
-      // --- preload STINT thumbnails ---
-      for (let i = 1; i <= 6; i++) {   // massimo 6 stints, ignorati se non esistono
+      for (let i = 1; i <= 6; i++) { 
         const img = new Image();
         img.src = `${base}/stints/stint_${i}.jpg`;
       }
 
-      // --- preload STAT thumbnails ---
       STAT_KEYS.forEach((key) => {
         const img = new Image();
         img.src = `${base}/stats/${key}.jpg`;
@@ -106,28 +103,24 @@ export default function PlayerPage() {
   }, [player, cards]);
 
 
-  // helper per FG e FG%
   function computeFgInfo(t: Record<string, string>) {
     const rawFg = t["FG"] || "";
     let fgDisplay = rawFg || "—";
 
-    // Se abbiamo già FG%
     if (t["FG%"] && t["FG%"].trim() !== "") {
       return { fgDisplay, fgPctDisplay: t["FG%"] };
     }
 
-    // Proviamo a calcolare da "FG" tipo "5-12"
     if (rawFg.includes("-")) {
       const [madeStr, attStr] = rawFg.split("-");
       const made = parseFloat(madeStr);
       const att = parseFloat(attStr);
       if (!isNaN(made) && !isNaN(att) && att > 0) {
-        const pct = ((made / att) * 100).toFixed(1); // es: 41.7
+        const pct = ((made / att) * 100).toFixed(1); 
         return { fgDisplay, fgPctDisplay: pct };
       }
     }
 
-    // fallback, nessuna info utile
     return { fgDisplay, fgPctDisplay: "" };
   }
 

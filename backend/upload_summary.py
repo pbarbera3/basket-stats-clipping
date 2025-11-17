@@ -14,7 +14,7 @@ with open(GAME_INFO_PATH, "r", encoding="utf-8") as f:
 
 PLAYER_NAME = info["player_name"]
 GAME_NAME = info["game_name"]
-PLAYER_ID = str(info.get("player_id", "")) or None  # optional field
+PLAYER_ID = str(info.get("player_id", "")) or None
 
 PLAYER_PHOTO_URL = (
     f"https://a.espncdn.com/i/headshots/mens-college-basketball/players/full/{PLAYER_ID}.png"
@@ -25,7 +25,6 @@ LOCAL_PHOTO = Path(f"data/photos/{PLAYER_NAME.replace(' ', '_')}.jpg")
 LOCAL_PBP_JSON = Path("data/metadata/pbp.json")
 # ==================
 
-# ---- Backblaze ----
 load_dotenv()
 B2_BUCKET = os.getenv("B2_BUCKET")
 B2_S3_ENDPOINT = os.getenv("B2_S3_ENDPOINT")
@@ -73,7 +72,6 @@ def main():
         "metadata": {}
     }
 
-    # --- PLAYER PHOTO ---
     if PLAYER_ID and not LOCAL_PHOTO.exists():
         try:
             r = requests.get(PLAYER_PHOTO_URL, timeout=10)
@@ -81,38 +79,34 @@ def main():
                 LOCAL_PHOTO.parent.mkdir(parents=True, exist_ok=True)
                 LOCAL_PHOTO.write_bytes(r.content)
                 print(
-                    f"✅ Downloaded player photo from ESPN: {PLAYER_PHOTO_URL}")
+                    f"Downloaded player photo from ESPN: {PLAYER_PHOTO_URL}")
             else:
                 print(
-                    f"⚠️ Failed to fetch player photo (status {r.status_code})")
+                    f"Failed to fetch player photo (status {r.status_code})")
         except Exception as e:
-            print(f"⚠️ Error downloading photo: {e}")
+            print(f"Error downloading photo: {e}")
 
     if LOCAL_PHOTO.exists():
         key = f"{player_key}/photo/{LOCAL_PHOTO.name}"
 
-        # ✅ Check if photo already exists on cloud
         try:
             s3.head_object(Bucket=B2_BUCKET, Key=key)
-            print(f"ℹ️ Player photo already exists on cloud: {b2_url(key)}")
+            print(f"ℹPlayer photo already exists on cloud: {b2_url(key)}")
             summary["photo"] = b2_url(key)
         except s3.exceptions.ClientError as e:
             if e.response["Error"]["Code"] == "404":
-                # File not found → upload
                 summary["photo"] = upload(LOCAL_PHOTO, key)
-                print(f"✅ Uploaded player photo: {summary['photo']}")
+                print(f"Uploaded player photo: {summary['photo']}")
             else:
                 raise
     else:
-        print("ℹ️ Skipping player photo upload (PLAYER_ID=None or local missing).")
+        print("Skipping player photo upload (PLAYER_ID=None or local missing).")
 
-    # --- Load ESPN JSON ---
     if not LOCAL_PBP_JSON.exists():
-        print("❌ Missing pbp.json, cannot extract game info.")
+        print("Missing pbp.json, cannot extract game info.")
         return
     pbp = json.load(open(LOCAL_PBP_JSON, encoding="utf-8"))
 
-    # --- Parse teams and logos ---
     away_name, home_name = parse_game_name(GAME_NAME)
     comp = pbp.get("header", {}).get("competitions", [{}])[0]
     competitors = comp.get("competitors", [])
@@ -138,7 +132,6 @@ def main():
             else f"{away_name.lower().replace(' ', '-')}.png"
         )
 
-        # Download + upload
         if logo_url:
             try:
                 lr = requests.get(logo_url, timeout=10)
@@ -149,11 +142,11 @@ def main():
                     logo_b2 = upload(local_logo, key)
                     local_logo.unlink(missing_ok=True)
                     summary["logos"][side] = logo_b2
-                    print(f"✅ Uploaded {side} logo ({display}): {logo_b2}")
+                    print(f"Uploaded {side} logo ({display}): {logo_b2}")
                 else:
-                    print(f"⚠️ Failed to download logo for {display}")
+                    print(f"Failed to download logo for {display}")
             except Exception as e:
-                print(f"⚠️ Error fetching {display} logo: {e}")
+                print(f"Error fetching {display} logo: {e}")
 
         summary["metadata"]["game_info"]["teams"].append({
             "side": side,
@@ -165,9 +158,8 @@ def main():
             "logo": summary["logos"].get(side)
         })
 
-    print("✅ Extracted teams and named logos from ESPN JSON")
+    print("Extracted teams and named logos from ESPN JSON")
 
-    # --- Extract and embed boxscore ---
     boxscore = pbp.get("boxscore", {}).get("players", [])
     summary["metadata"]["boxscore"] = boxscore
 
@@ -181,7 +173,7 @@ def main():
                     stats_values = athlete.get("stats", []) or []
                     player_totals = dict(zip(names, stats_values))
                     summary["totals"] = player_totals
-                    print("✅ Extracted player totals from ESPN boxscore")
+                    print("Extracted player totals from ESPN boxscore")
                     break
             if player_totals:
                 break
@@ -189,9 +181,8 @@ def main():
             break
 
     if not player_totals:
-        print("⚠️ Could not find player totals (check ID or JSON structure).")
+        print("Could not find player totals (check ID or JSON structure).")
 
-    # --- Upload summary manifest ---
     manifest_local = Path(
         f"data/processed/{player_key}/{GAME_NAME}/metadata/summary.json"
     )

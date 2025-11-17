@@ -49,28 +49,24 @@ export default function GamePage() {
     "missed_shots"
     ];
 
-  // helper per FG e FG%
   function computeFgInfo(t: Record<string, string>) {
     const rawFg = t["FG"] || "";
     let fgDisplay = rawFg || "—";
 
-    // Se abbiamo già FG%
     if (t["FG%"] && t["FG%"].trim() !== "") {
       return { fgDisplay, fgPctDisplay: t["FG%"] };
     }
 
-    // Proviamo a calcolare da "FG" tipo "5-12"
     if (rawFg.includes("-")) {
       const [madeStr, attStr] = rawFg.split("-");
       const made = parseFloat(madeStr);
       const att = parseFloat(attStr);
       if (!isNaN(made) && !isNaN(att) && att > 0) {
-        const pct = ((made / att) * 100).toFixed(1); // es: 41.7
+        const pct = ((made / att) * 100).toFixed(1);
         return { fgDisplay, fgPctDisplay: pct };
       }
     }
 
-    // fallback, nessuna info utile
     return { fgDisplay, fgPctDisplay: "" };
   }
 
@@ -84,11 +80,10 @@ export default function GamePage() {
 
     const { fgDisplay, fgPctDisplay } = computeFgInfo(t);
 
-    // pick 2 best among AST, BLK, STL
     const topTwo = Object.entries({ AST: ast, BLK: blk, STL: stl })
       .sort((a, b) => b[1] - a[1])
       .slice(0, 2)
-      .map(([key]) => `${key}: ${t[key] ?? "0"}`); // <-- keep uppercase here
+      .map(([key]) => `${key}: ${t[key] ?? "0"}`);
 
     const fgPart =
       fgPctDisplay && fgPctDisplay !== "—"
@@ -110,7 +105,6 @@ export default function GamePage() {
         const videos = document.querySelectorAll("video");
         if (!videos.length) return;
 
-        // find the one that's playing or visible
         videos.forEach((v) => {
         const video = v as HTMLVideoElement;
         if (!video.paused && !video.ended) {
@@ -149,7 +143,6 @@ export default function GamePage() {
           }));
         setStints(stintsList);
 
-        // get score from pbp
         try {
           const pbp = await (await fetch(`${base}/metadata/pbp.json`)).json();
           const lastPlay = pbp?.plays?.slice(-1)[0];
@@ -180,7 +173,6 @@ export default function GamePage() {
 
   if (!summary || !manifest) return <div className="loading">Loading...</div>;
 
-  // Split team names
   const [awayTeam, homeTeam] = decodedGame.split("@").map((s) => s.trim());
 
   return (
@@ -232,8 +224,8 @@ export default function GamePage() {
           controls
           playsInline
           preload="metadata"
-          onWaiting={(e) => console.log("⏳ Buffering stint video")}
-          onCanPlay={(e) => console.log("✅ Stint video ready")}
+          onWaiting={(e) => console.log("Buffering stint video")}
+          onCanPlay={(e) => console.log("Stint video ready")}
         />
       </div>
 
@@ -259,8 +251,8 @@ export default function GamePage() {
             controls
             playsInline
             preload="metadata"
-            onWaiting={(e) => console.log("⏳ Buffering stat video")}
-            onCanPlay={(e) => console.log("✅ Stat video ready")}
+            onWaiting={(e) => console.log("Buffering stat video")}
+            onCanPlay={(e) => console.log("Stat video ready")}
           />  
         </div>
       )}

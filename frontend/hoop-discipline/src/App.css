@@ -28,12 +28,11 @@ h1 {
   max-width: 900px;
 }
 
-/* CARD STYLING */
 .player-card {
   background-color: #1c1c1c;
   border-radius: 16px;
   padding: 1.5rem;
-  text-align: center;           /* ✅ center content */
+  text-align: center;           
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -46,10 +45,9 @@ h1 {
 
 .player-card:hover {
   background-color: #242424;
-  transform: translateY(-4px);  /* nice subtle hover */
+  transform: translateY(-4px);  
 }
 
-/* IMAGE — DO NOT TOUCH STYLE EXCEPT LOADING FIX */
 .player-card img {
   width: 90px;
   height: 90px;
@@ -57,7 +55,6 @@ h1 {
   object-fit: cover;
   border: 2px solid #333;
 
-  /* hide alt text on load */
   color: transparent;
 }
 
@@ -65,7 +62,6 @@ h1 {
   opacity: 1;
 }
 
-/* TEXT */
 .player-info h2 {
   margin: 0;
   font-size: 1.2rem;

@@ -40,13 +40,11 @@ def find_video_time_in_half(clock_df, target_clock, half_label, tol=0.6):
 def main(output_dir):
     os.makedirs(output_dir, exist_ok=True)
 
-    # Load data
     clock_df = pd.read_csv(CLOCK_CSV)
-    subs_df = pd.read_csv(SUBS_CSV)  # player, half, start_clock, end_clock
-
+    subs_df = pd.read_csv(SUBS_CSV)
     intervals = subs_df[subs_df["player"] == PLAYER_NAME].copy()
 
-    print(f"🎬 Cutting {len(intervals)} intervals for {PLAYER_NAME}...\n")
+    print(f"Cutting {len(intervals)} intervals for {PLAYER_NAME}...\n")
 
     for i, row in tqdm(intervals.iterrows(), total=len(intervals),
                        desc="Processing intervals", ncols=80):
@@ -59,7 +57,7 @@ def main(output_dir):
 
         if start_time is None or end_time is None:
             print(
-                f"\n⚠️ Skipping {half_label}: {start_clock} → {end_clock} (no match)")
+                f"\nSkipping {half_label}: {start_clock} → {end_clock} (no match)")
             continue
 
         if start_time > end_time:
@@ -79,7 +77,7 @@ def main(output_dir):
         subprocess.run(cmd, stdout=subprocess.DEVNULL,
                        stderr=subprocess.DEVNULL)
 
-    print(f"\n🏁 Done! {len(intervals)} intervals saved in {output_dir}")
+    print(f"\nDone! {len(intervals)} intervals saved in {output_dir}")
 
 
 if __name__ == "__main__":

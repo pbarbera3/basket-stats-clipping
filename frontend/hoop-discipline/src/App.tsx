@@ -15,7 +15,6 @@ interface Player {
   games: Game[];
 }
 
-// --- Accent color generator (in this file, no utils.ts needed) ---
 function generateAccent(hex: string = "#888") {
   try {
     const r = parseInt(hex.slice(1, 3), 16);
@@ -83,7 +82,7 @@ function App() {
         const data = await response.json();
         setPlayers(data);
       } catch (error) {
-        console.error("❌ Failed to fetch players:", error);
+        console.error("Failed to fetch players:", error);
       } finally {
         setLoading(false);
       }

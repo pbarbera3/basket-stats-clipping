@@ -36,7 +36,6 @@
   max-width: 1000px;
 }
 
-/* card */
 .game-card {
   background-color: #1c1c1c;
   border-radius: 12px;
@@ -50,7 +49,6 @@
 }
 .game-card:hover { background-color: #262626; transform: translateY(-1px); }
 
-/* logos + score outside */
 .logos-row {
   display: flex;
   align-items: center;
@@ -83,7 +81,6 @@
 .game-name { font-size: 1.1rem; font-weight: bold; margin: 0; }
 .game-subtext { margin-top: 0.2rem; font-size: 0.9rem; color: #aaa; }
 
-/* compact 5-stat line */
 .compact-stats {
   margin-top: 0.6rem;
   font-size: 0.92rem;
@@ -98,7 +95,6 @@
   color: #6f6f6f;
 }
 
-/* mini selector */
 .mini-selector {
   margin-top: 0.5rem;
   display: flex;
@@ -123,7 +119,6 @@
   box-shadow: 0 0 0 1px rgba(255,255,255,.1) inset;
 }
 
-/* === SKELETON LOADER === */
 
 .skeleton {
   background: #1a1a1a;
@@ -184,7 +179,6 @@
 }
 
 
-/* responsive tweaks */
 @media (max-width: 480px) {
   .team-logo { width: 48px; height: 48px; }
   .score-num { font-size: 18px; }

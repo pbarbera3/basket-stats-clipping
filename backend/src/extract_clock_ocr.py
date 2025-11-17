@@ -21,19 +21,15 @@ def normalize_clock(raw: str):
     s = s.replace(",", ":").replace(
         ".", ":").replace("O", "0").replace("o", "0")
 
-    # Case 1: already M:SS
     if re.match(r"^\d{1,2}:\d{2}$", s):
         return s
 
-    # Case 2: format like "1900" → "19:00"
     if re.match(r"^\d{3,4}$", s):
         return s[:-2] + ":" + s[-2:]
 
-    # Case 3: shot clock decimals (e.g. "45.3")
     if re.match(r"^\d{1,2}\.\d$", raw.strip()):
         return raw.strip()
 
-    # Case 4: a lonely number like "19" → assume "19:00"
     if re.match(r"^\d{1,2}$", s):
         return s + ":00"
 
@@ -53,10 +49,8 @@ def extract_clock_ocr(video_path: str,
     duration = total_frames / fps
     print(f"🎥 Loaded video ({duration/60:.1f} min, {fps:.1f} fps)")
 
-    # Jump ahead 30 sec so clock is visible
     cap.set(cv2.CAP_PROP_POS_MSEC, START_SEC * 1000)
 
-    # ---- Step 1: ROI ----
     ret, frame = cap.read()
     if not ret:
         raise RuntimeError("Could not read frame at 30s mark.")
@@ -70,12 +64,11 @@ def extract_clock_ocr(video_path: str,
         x, y, w, h = CLOCK_ROI
         print(f"✅ Using predefined ROI: x={x}, y={y}, w={w}, h={h}")
 
-    # ---- Step 2: OCR ----
     reader = easyocr.Reader(["en"], gpu=True)
     frame_interval = int(fps * sample_rate)
     results = []
 
-    cap.set(cv2.CAP_PROP_POS_MSEC, START_SEC * 1000)  # start OCR loop at 30 s
+    cap.set(cv2.CAP_PROP_POS_MSEC, START_SEC * 1000)
 
     while True:
         ret, frame = cap.read()
@@ -114,7 +107,7 @@ def extract_clock_ocr(video_path: str,
         writer.writerow(["video_time_sec", "clock_text"])
         writer.writerows(results)
 
-    print(f"\n✅ Saved clock OCR map to {output_csv} ({len(results)} entries).")
+    print(f"\nSaved clock OCR map to {output_csv} ({len(results)} entries).")
 
 
 if __name__ == "__main__":

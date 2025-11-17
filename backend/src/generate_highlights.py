@@ -20,16 +20,6 @@ POST_SEC = 2.5
 KEEP_SEGMENTS = False
 # ==================
 
-# Plays requiring deep debug
-DEBUG_PLAYS = [
-    "Connor Turnbull made Jumper. Assisted by Gabriel Pozzato.",
-    "Gabriel Pozzato Turnover."
-]
-
-
-def is_deep_debug(text: str) -> bool:
-    return text.strip() in DEBUG_PLAYS
-
 
 def clock_to_seconds(clock_str):
     if not isinstance(clock_str, str):
@@ -46,7 +36,6 @@ def find_video_time(clock_df, clock_text, tolerance=5.0):
     clock_df = clock_df.copy()
     clock_df["clock_val"] = clock_df["clock_text"].apply(clock_to_seconds)
 
-    # signed and absolute delta
     clock_df["signed_diff"] = clock_df["clock_val"] - val_event
     clock_df["abs_diff"] = clock_df["signed_diff"].abs()
 
@@ -119,8 +108,6 @@ def categorize_play(play, player_name):
     return sorted(set(cats))
 
 
-# ============================= MAIN =============================
-
 def main(output_dir):
     os.makedirs(output_dir, exist_ok=True)
 
@@ -131,7 +118,6 @@ def main(output_dir):
 
     events = []
 
-    # ---------- PARSE EVENTS ----------
     for play in plays:
         text = play.get("text", "")
         period = (play.get("period", {}) or {}).get("number")
@@ -157,22 +143,21 @@ def main(output_dir):
             })
 
     if not events:
-        print("⚠️ No events found.")
+        print("No events found.")
         return
 
     df = pd.DataFrame(events)
-    print(f"🎯 Found {len(df)} highlight events for {PLAYER_NAME}")
+    print(f"Found {len(df)} highlight events for {PLAYER_NAME}")
 
     temp_root = mkdtemp(prefix="hl_")
 
-    # ---------- CUT CLIPS ----------
     try:
         for category, group in df.groupby("category"):
             group = group.sort_values("video_time").reset_index(drop=True)
             temp_cat_dir = os.path.join(temp_root, category)
             os.makedirs(temp_cat_dir, exist_ok=True)
 
-            print(f"\n🎬 Cutting {len(group)} clips for {category}...")
+            print(f"\nCutting {len(group)} clips for {category}...")
             segment_paths = []
 
             for i, row in tqdm(group.iterrows(), total=len(group)):
@@ -197,7 +182,6 @@ def main(output_dir):
                 subprocess.run(cmd, stdout=subprocess.DEVNULL,
                                stderr=subprocess.DEVNULL)
 
-            # merge clips
             concat_txt = os.path.join(temp_cat_dir, "segments.txt")
             with open(concat_txt, "w") as f:
                 for p in segment_paths:
@@ -210,7 +194,7 @@ def main(output_dir):
                 stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
             )
 
-            print(f"✅ Saved: {final_out}")
+            print(f"Saved: {final_out}")
 
             if not KEEP_SEGMENTS:
                 shutil.rmtree(temp_cat_dir, ignore_errors=True)
@@ -219,8 +203,6 @@ def main(output_dir):
         if not KEEP_SEGMENTS:
             shutil.rmtree(temp_root, ignore_errors=True)
 
-
-# ====================== ENTRY ======================
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

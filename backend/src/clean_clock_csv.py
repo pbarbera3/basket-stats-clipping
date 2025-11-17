@@ -2,13 +2,14 @@ import csv
 import re
 import os
 
+# ======= CONFIG =======
 INPUT_CSV = "data/metadata/clock_map.csv"
 OUTPUT_CSV = "data/metadata/clock_map_clean.csv"
 
-# --- tuning: widen slightly if your OCR jumps to 19:45 instead of 19:50 ---
-HALF_RESET_MIN = 19 * 60 + 45   # accept 19:45..20:00 as start of half
-OT_RESET_MIN = 4 * 60 + 50    # accept 4:50..5:00 as start of OT
-END_THRESHOLD = 2.5            # treat <=2.5s as "end of period"
+HALF_RESET_MIN = 19 * 60 + 45
+OT_RESET_MIN = 4 * 60 + 50
+END_THRESHOLD = 2.5
+# ======================
 
 
 def clock_to_seconds(clock: str):
@@ -56,17 +57,14 @@ def smart_clean_sequence(rows):
         prev = sec_at(i - 1)
         nxt = sec_at(i + 1)
 
-        # keep boundaries
         if prev is None or nxt is None:
             cleaned.append((t, clock))
             continue
 
-        # preserve real resets like 1.2 -> 19:57 / 4:50 -> 5:00
         if is_period_reset(prev, curr):
             cleaned.append((t, clock))
             continue
 
-        # spike removal
         trio = [x for x in (prev, curr, nxt) if x is not None]
         med = sorted(trio)[len(trio) // 2]
 
@@ -87,7 +85,7 @@ def label_periods(cleaned_rows):
     Returns list of (video_time_sec, clock_text, half_label).
     """
     labeled = []
-    period_idx = 1  # 1=1st, 2=2nd, >=3 OT#
+    period_idx = 1
     prev_sec = None
 
     def label_for(idx):
@@ -109,24 +107,24 @@ def label_periods(cleaned_rows):
 
 def main():
     if not os.path.exists(INPUT_CSV):
-        raise FileNotFoundError(f"❌ Input file not found: {INPUT_CSV}")
+        raise FileNotFoundError(f"Input file not found: {INPUT_CSV}")
 
-    print(f"📂 Loading {INPUT_CSV}...")
+    print(f"Loading {INPUT_CSV}...")
     with open(INPUT_CSV, newline="", encoding="utf-8") as f:
         reader = csv.reader(f)
-        _header = next(reader, None)  # allow with/without header
+        _header = next(reader, None)
         rows = []
         for r in reader:
             if len(r) >= 2:
                 try:
                     rows.append((float(r[0]), r[1]))
                 except:
-                    # if line has header again or bad row, skip
+
                     continue
 
-    print(f"🔍 Cleaning {len(rows)} entries...")
+    print(f"Cleaning {len(rows)} entries...")
     cleaned = smart_clean_sequence(rows)
-    print(f"✅ Kept {len(cleaned)} entries ({len(rows)-len(cleaned)} removed).")
+    print(f"Kept {len(cleaned)} entries ({len(rows)-len(cleaned)} removed).")
 
     labeled = label_periods(cleaned)
 
@@ -136,7 +134,7 @@ def main():
         writer.writerow(["video_time_sec", "clock_text", "half"])
         writer.writerows(labeled)
 
-    print(f"💾 Saved labeled CSV → {OUTPUT_CSV}")
+    print(f"Saved labeled CSV → {OUTPUT_CSV}")
 
 
 if __name__ == "__main__":

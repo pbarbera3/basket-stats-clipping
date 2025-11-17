@@ -15,9 +15,8 @@ PLAYER_NAME = info["player_name"]
 GAME_NAME = info["game_name"]
 # =====================
 
-# Updated local folders (match pipeline outputs)
 LOCAL_BASE = Path("data/processed") / PLAYER_NAME.replace(" ", "_") / GAME_NAME
-LOCAL_STINTS_DIR = LOCAL_BASE / "intervals"  # local name
+LOCAL_STINTS_DIR = LOCAL_BASE / "intervals"
 LOCAL_STATS_DIR = LOCAL_BASE / "stats"
 LOCAL_METADATA_DIR = LOCAL_BASE / "metadata"
 
@@ -31,7 +30,6 @@ CANDIDATE_STATS = [
     "2pt_made", "2pt_missed", "3pt_made", "3pt_missed"
 ]
 
-# ---- env / b2 client ----
 load_dotenv()
 B2_BUCKET = os.getenv("B2_BUCKET")
 B2_S3_ENDPOINT = os.getenv("B2_S3_ENDPOINT")
@@ -58,17 +56,15 @@ def upload(local: Path, key: str) -> str:
     return b2_url(key)
 
 
-# ---------- STINTS ----------
 def enumerate_stints(stints_dir: Path):
     """Return all mp4 stints sorted numerically."""
     files = list(stints_dir.glob("stint_*.mp4"))
 
-    files.sort(key=lambda f: int(f.stem.split("_")[1]))  # extract number
+    files.sort(key=lambda f: int(f.stem.split("_")[1]))
 
     return files
 
 
-# ---------- STATS ----------
 def find_stat_videos(stats_dir: Path):
     out = {}
     for cat in CANDIDATE_STATS:
@@ -89,7 +85,6 @@ def main():
         "metadata": {}
     }
 
-    # --- stints ---
     if LOCAL_STINTS_DIR.exists():
         stints = enumerate_stints(LOCAL_STINTS_DIR)
         for idx, f in enumerate(stints, start=1):
@@ -99,9 +94,8 @@ def main():
                 {"n": idx, "file": f.name, "key": key, "url": url})
             print(f"[stint {idx}] {url}")
     else:
-        print("⚠️ No stints folder found, skipping.")
+        print("No stints folder found, skipping.")
 
-    # --- stats ---
     if LOCAL_STATS_DIR.exists():
         stats = find_stat_videos(LOCAL_STATS_DIR)
         for cat, f in stats.items():
@@ -110,9 +104,8 @@ def main():
             manifest["stats"][cat] = {"file": f.name, "key": key, "url": url}
             print(f"[stat {cat}] {url}")
     else:
-        print("⚠️ No stats folder found, skipping.")
+        print("No stats folder found, skipping.")
 
-    # --- metadata ---
     for meta_file, label in [
         (LOCAL_SUBS_INTERVALS, "subs_intervals_csv"),
         (LOCAL_PBP_JSON, "pbp_json")
@@ -123,15 +116,14 @@ def main():
             manifest["metadata"][label] = {"key": key, "url": url}
             print(f"[meta {label}] {url}")
 
-    # --- manifest ---
     manifest_local = LOCAL_METADATA_DIR / "manifest.json"
     manifest_local.parent.mkdir(parents=True, exist_ok=True)
     manifest_local.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
 
     mkey = f"{base_prefix}/metadata/manifest.json"
     upload(manifest_local, mkey)
-    print(f"\n✅ Uploaded manifest: {b2_url(mkey)}")
-    print("🏁 Upload complete!")
+    print(f"\nUploaded manifest: {b2_url(mkey)}")
+    print("Upload complete!")
 
 
 if __name__ == "__main__":
