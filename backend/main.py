@@ -35,7 +35,7 @@ def main():
     espn_id = str(info["espn_id"])
     video_path = info["video_path"]
 
-    print("\n GAME INFO")
+    print("\nGAME INFO")
     print(f"Player: {player_name}")
     print(f"Game:   {game_name}")
     print(f"ESPN ID: {espn_id}")
