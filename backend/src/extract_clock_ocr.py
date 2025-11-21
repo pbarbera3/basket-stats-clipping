@@ -16,9 +16,20 @@ def normalize_clock(raw: str):
     if not raw:
         return None
 
-    s = raw.strip().replace(" ", "").replace(
+    raw_clean = raw.strip().replace(" ", "").replace(
         "•", "").replace("-", "").replace(";", ":")
-    s = s.replace(",", ":").replace(
+
+    m = re.match(r"^(\d{1,2}):(\d{1,2})\.(\d)$", raw_clean)
+    if m:
+        seconds = m.group(2).lstrip("0")
+        if seconds == "":
+            seconds = "0"
+        return f"{seconds}.{m.group(3)}"
+
+    if re.match(r"^\d{1,2}\.\d$", raw_clean):
+        return raw_clean
+
+    s = raw_clean.replace(",", ":").replace(
         ".", ":").replace("O", "0").replace("o", "0")
 
     if re.match(r"^\d{1,2}:\d{2}$", s):
@@ -26,9 +37,6 @@ def normalize_clock(raw: str):
 
     if re.match(r"^\d{3,4}$", s):
         return s[:-2] + ":" + s[-2:]
-
-    if re.match(r"^\d{1,2}\.\d$", raw.strip()):
-        return raw.strip()
 
     if re.match(r"^\d{1,2}$", s):
         return s + ":00"
