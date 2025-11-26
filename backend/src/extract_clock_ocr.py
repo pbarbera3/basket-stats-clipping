@@ -19,6 +19,10 @@ def normalize_clock(raw: str):
     raw_clean = raw.strip().replace(" ", "").replace(
         "•", "").replace("-", "").replace(";", ":")
 
+    # NEW: remove leading colon like ":35.3"
+    if raw_clean.startswith(":"):
+        raw_clean = raw_clean[1:]
+
     m = re.match(r"^(\d{1,2}):(\d{1,2})\.(\d)$", raw_clean)
     if m:
         seconds = m.group(2).lstrip("0")
