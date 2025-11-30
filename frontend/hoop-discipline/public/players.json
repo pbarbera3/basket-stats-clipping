@@ -60,6 +60,18 @@
       {
         "name": "UMass Lowell @ Bradley",
         "slug": "UMassLowell@Bradley"
+      },
+      {
+        "name": "Princeton @ Bradley",
+        "slug": "Princeton@Bradley"
+      },
+      {
+        "name": "UC San Diego @ Bradley",
+        "slug": "UCSanDiego@Bradley"
+      },
+      {
+        "name": "Liberty @ Bradley",
+        "slug": "Liberty@Bradley"
       }
     ]
   }
