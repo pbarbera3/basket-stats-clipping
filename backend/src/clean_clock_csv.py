@@ -8,7 +8,7 @@ OUTPUT_CSV = "data/metadata/clock_map_clean.csv"
 
 HALF_RESET_MIN = 19 * 60 + 45
 OT_RESET_MIN = 4 * 60 + 50
-END_THRESHOLD = 11.5
+END_THRESHOLD = 5
 # ======================
 
 

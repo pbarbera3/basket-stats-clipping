@@ -76,6 +76,22 @@
       {
         "name": "Liberty @ Bradley",
         "slug": "Liberty@Bradley"
+      },
+      {
+        "name": "Washington State @ Bradley",
+        "slug": "WashingtonState@Bradley"
+      }
+    ]
+  },
+  {
+    "name": "Rene D'Amelio",
+    "slug": "Rene_D'Amelio",
+    "team": "California Batist University",
+    "teamColor": "#002453",
+    "games": [
+      {
+        "name": "CalBaptist @ Brigham Young",
+        "slug": "CalBaptist@BrighamYoung"
       }
     ]
   }
