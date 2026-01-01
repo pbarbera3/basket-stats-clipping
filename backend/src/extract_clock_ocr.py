@@ -7,7 +7,7 @@ import argparse
 
 # ======= CONFIG =======
 USE_MANUAL_ROI = True
-START_SEC = 10
+START_SEC = 23
 CLOCK_ROI = None
 # ======================
 

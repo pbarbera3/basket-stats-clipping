@@ -28,6 +28,10 @@
       {
         "name": "St. Bonaventure @ Buffalo",
         "slug": "StBonaventure@Buffalo"
+      },
+      {
+        "name": "Colgate @ St. Bonaventure",
+        "slug": "Colgate@StBonaventure"
       }
     ]
   },
