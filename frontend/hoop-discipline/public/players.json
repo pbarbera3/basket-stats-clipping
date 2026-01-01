@@ -24,7 +24,11 @@
       {
         "name": "St. Bonaventure @ Florida Atlantic",
         "slug": "StBonaventure@FloridaAtlantic"
-      }   
+      },
+      {
+        "name": "St. Bonaventure @ Buffalo",
+        "slug": "StBonaventure@Buffalo"
+      }
     ]
   },
   {
