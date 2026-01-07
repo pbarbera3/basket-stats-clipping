@@ -32,6 +32,10 @@
       {
         "name": "Colgate @ St. Bonaventure",
         "slug": "Colgate@StBonaventure"
+      },
+      {
+        "name": "Le Moyne @ St. Bonaventure",
+        "slug": "LeMoyne@StBonaventure"
       }
     ]
   },
@@ -98,7 +102,11 @@
     "teamColor": "#002453",
     "games": [
       {
-        "name": "CalBaptist @ Brigham Young",
+        "name": "Cal Baptist @ Brigham Young",
+        "slug": "CalBaptist@BrighamYoung"
+      },
+      {
+        "name": "Cal Baptist @ Tarleton State",
         "slug": "CalBaptist@BrighamYoung"
       }
     ]
